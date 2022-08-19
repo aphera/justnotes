@@ -46,8 +46,10 @@
 		allFreqs.postln;
 		Pan2.ar(Mix.new(allFreqs.collect(jnsynth)), 0.0);
 	};
-	// buildChord.value(55, [59, 62, 65, 69]); // G
-	buildChord.value(50, [53, 57, 60, 64]); // D
+	buildChord.value(55, [59, 62, 65, 69]); // G
+	// buildChord.value(50, [53, 57, 60, 64]); // D
+	// buildChord.value(62, [41, 69, 72, 52]); // D (alt)
 	// buildChord.value(46, [49, 53, 56, 59]); // B-flat
 	// buildChord.value(45, [48, 52, 55, 58]); // A
+	// buildChord.value(57, [60, 64, 67, 58]); // A (alt)
 }.play;
