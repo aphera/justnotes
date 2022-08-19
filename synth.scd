@@ -1,7 +1,51 @@
 {
+	var	intervalToRatio = Dictionary[
+		// from https://music.stackexchange.com/questions/108096/what-are-the-ratios-of-just-intonation
+		0 -> 1,
+		1 -> (16 / 15),
+		2 -> (9  / 8),
+		3 -> (6 / 5),
+		4 -> (5 / 4),
+		5 -> (4 / 3),
+		6 -> (45 / 32),
+		7 -> (3 / 2),
+		8 -> (8 / 5),
+		9 -> (5 / 3),
+		10 -> (9 / 5),
+		11 -> (15 / 8),
+	];
+
 	var midiToFreq = {
 		arg midiNote;
 		440 * (2 ** ((midiNote - 69) / 12));
 	};
-	midiToFreq.value(60).postln;
-}.value;
+
+	var jnsynth = {
+		arg freq;
+		SinOsc.ar(freq, 0, 0.2)
+	};
+
+	var getFrequencyMultiplier = {
+		arg fundamental, harmonic;
+		var difference = harmonic - fundamental;
+		2 ** (difference / 12).floor;
+	};
+
+	var buildChord = {
+		arg fundamental, harmonics; // These should be midi notes
+		var fundamentalFreq = midiToFreq.value(fundamental);
+		var getHarmonicFreq = {
+			arg harmonic;
+			var multiplier = getFrequencyMultiplier.value(fundamental, harmonic);
+			var interval = (harmonic - fundamental) % 12;
+			var ratio = intervalToRatio[interval] * multiplier;
+			ratio.postln;
+			ratio * fundamentalFreq;
+		};
+		var harmonicFreqs = harmonics.collect(getHarmonicFreq);
+		var allFreqs = [fundamentalFreq] ++ harmonicFreqs;
+		allFreqs.postln;
+		allFreqs.collect(jnsynth);
+	};
+	buildChord.value(69, [77, 81]);
+}.play;
