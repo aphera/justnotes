@@ -39,13 +39,15 @@
 			var multiplier = getFrequencyMultiplier.value(fundamental, harmonic);
 			var interval = (harmonic - fundamental) % 12;
 			var ratio = intervalToRatio[interval] * multiplier;
-			ratio.postln;
 			ratio * fundamentalFreq;
 		};
 		var harmonicFreqs = harmonics.collect(getHarmonicFreq);
 		var allFreqs = [fundamentalFreq] ++ harmonicFreqs;
 		allFreqs.postln;
-		allFreqs.collect(jnsynth);
+		Pan2.ar(Mix.new(allFreqs.collect(jnsynth)), 0.0);
 	};
-	buildChord.value(69, [77, 81]);
+	// buildChord.value(55, [59, 62, 65, 69]); // G
+	buildChord.value(50, [53, 57, 60, 64]); // D
+	// buildChord.value(46, [49, 53, 56, 59]); // B-flat
+	// buildChord.value(45, [48, 52, 55, 58]); // A
 }.play;
