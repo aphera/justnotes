@@ -22,15 +22,14 @@
 
 	var jnsynth = {
 		arg freq;
-		Pulse.ar(freq * 2.002, 0.367879441, 0.01) +
-		SinOsc.ar(freq, 0.2, 0.2) +
-		Saw.ar(freq * 0.499999, 0.02);
+		// Pulse.ar(freq * 2.002, 0.367879441, 0.01) +
+		SinOsc.ar(freq, 0.2, 0.2);
+		// Saw.ar(freq * 0.499999, 0.02);
 	};
 
 	var getFrequencyMultiplier = {
-		arg fundamental, harmonic;
-		var difference = harmonic - fundamental;
-		2 ** (difference / 12).floor;
+		arg interval;
+		2 ** (interval / 12).floor;
 	};
 
 	var buildChordWithNotes = {
@@ -38,9 +37,10 @@
 		var fundamentalFreq = midiToFreq.value(fundamental);
 		var getHarmonicFreq = {
 			arg harmonic;
-			var multiplier = getFrequencyMultiplier.value(fundamental, harmonic);
-			var interval = (harmonic - fundamental) % 12;
-			var ratio = intervalToRatio[interval] * multiplier;
+			var interval = harmonic - fundamental;
+			var multiplier = getFrequencyMultiplier.value(interval);
+			var closedInterval = (harmonic - fundamental) % 12;
+			var ratio = intervalToRatio[closedInterval] * multiplier;
 			ratio * fundamentalFreq;
 		};
 		var harmonicFreqs = harmonics.collect(getHarmonicFreq);
@@ -48,11 +48,28 @@
 		allFreqs.postln;
 		Pan2.ar(Mix.new(allFreqs.collect(jnsynth)), 0.0);
 	};
-	buildChordWithNotes.value(55, [59, 62, 65, 69]); // G
+
+	var buildChordWithFreqAndIntervals = {
+		arg fundamentalFreq, intervals;  // Does not automatically play the fundamental
+		var getIntervalFreq = {
+			arg interval;
+			var multiplier = getFrequencyMultiplier.value(interval);
+			var closedInterval = (interval) % 12;
+			var ratio = intervalToRatio[closedInterval] * multiplier;
+			ratio * fundamentalFreq;
+		};
+		var harmonicFreqs = intervals.collect(getIntervalFreq);
+		var allFreqs = [fundamentalFreq] ++ harmonicFreqs;
+		allFreqs.postln;
+		Pan2.ar(Mix.new(allFreqs.collect(jnsynth)), 0.0);
+	};
+	buildChordWithFreqAndIntervals.value(midiToFreq.value(55), [0, 4, 7, 10, 14]); // G
+	// buildChordWithNotes.value(55, [59, 62, 65, 69]); // G
 	// buildChordWithNotes.value(50, [53, 57, 60, 64]); // D
 	// buildChordWithNotes.value(62, [41, 69, 72, 52]); // D (alt)
 	// buildChordWithNotes.value(46, [49, 53, 56, 59]); // B-flat
 	// buildChordWithNotes.value(46, [50, 53, 56, 59]); // B-flat (alt)
 	// buildChordWithNotes.value(45, [48, 52, 55, 58]); // A
 	// buildChordWithNotes.value(57, [60, 64, 67, 58]); // A (alt)
+
 }.play;
